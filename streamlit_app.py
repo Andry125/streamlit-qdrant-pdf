@@ -61,17 +61,27 @@ with tab1:
 with tab2:
     query = st.text_input("Entre ta requête (mot-clé ou phrase)")
 
-    if query:
+    if query and uploaded_file is not None:
         query_vector = model.encode(query).tolist()
         try:
             response = client.query_points(
                 collection_name="pdf_docs",
                 query=query_vector,
-                limit=5
+                limit=10  # on prend plus de résultats pour filtrer ensuite
             )
 
             st.write("Résultats :")
-            for sp in response.points:
+            # Post-filtrage : garder seulement les passages contenant le mot-clé
+            filtered_points = [
+                sp for sp in response.points
+                if query.lower() in sp.payload.get("text", "").lower()
+            ]
+
+            if not filtered_points:
+                st.warning("⚠️ Aucun passage ne contient exactement ce mot, mais voici les plus proches :")
+                filtered_points = response.points  # fallback : montrer quand même les résultats
+
+            for sp in filtered_points[:5]:  # limiter à 5 affichages
                 score = sp.score
                 payload = sp.payload or {}
                 page = payload.get("page", "?")
