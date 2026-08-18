@@ -16,24 +16,15 @@ st.title("🔎 API Qdrant via Streamlit")
 
 # Récupérer le paramètre GET ?q=motcle
 query = st.query_params.get("q", "")
+fmt = st.query_params.get("format", "")
 
 if query:
     query_vector = model.encode(query).tolist()
-    response = client.query_points(
-        collection_name="pdf_docs",
-        query=query_vector,
-        limit=5
-    )
+    response = client.query_points(collection_name="pdf_docs", query=query_vector, limit=5)
+    results = [{"score": sp.score, "page": sp.payload.get("page", "?"), "text": sp.payload.get("text", "")} for sp in response.points]
 
-    results = [
-        {
-            "score": sp.score,
-            "page": sp.payload.get("page", "?"),
-            "text": sp.payload.get("text", "")
-        }
-        for sp in response.points
-    ]
-
-    st.json(results)
-else:
-    st.write("Ajoute ?q=motcle à l’URL pour tester.")
+    if fmt == "json":
+        import json
+        st.write(json.dumps(results))
+    else:
+        st.json(results)
