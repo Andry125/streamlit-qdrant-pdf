@@ -65,7 +65,7 @@ with tab2:
     if query:
         query_vector = model.encode(query).tolist()  # convertir en liste
         try:
-            results = client.search_points(
+            results = client.query_points(
                 collection_name="pdf_docs",
                 query=query_vector,
                 limit=5
