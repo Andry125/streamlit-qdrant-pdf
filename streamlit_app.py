@@ -63,7 +63,7 @@ with tab2:
     query = st.text_input("Entre ta requête (mot-clé ou phrase)")
 
     if query:
-        query_vector = model.encode(query).tolist()  # convertir en liste
+        query_vector = model.encode(query).tolist()
         try:
             results = client.query_points(
                 collection_name="pdf_docs",
@@ -73,8 +73,24 @@ with tab2:
 
             st.write("Résultats :")
             for r in results:
-                st.write(f"**Score:** {r.score:.4f} | **Page:** {r.payload.get('page', '?')}")
-                st.write(r.payload["text"])
+                # Si r est un dict
+                if isinstance(r, dict):
+                    score = r.get("score", None)
+                    payload = r.get("payload", {})
+                # Si r est un objet avec attributs
+                elif hasattr(r, "score") and hasattr(r, "payload"):
+                    score = r.score
+                    payload = r.payload
+                # Si r est un tuple (score, payload)
+                elif isinstance(r, tuple) and len(r) >= 2:
+                    score, payload = r[0], r[1]
+                else:
+                    st.write("Format inattendu:", r)
+                    continue
+
+                st.write(f"**Score:** {score} | **Page:** {payload.get('page', '?')}")
+                st.write(payload.get("text", ""))
                 st.write("---")
+
         except Exception as e:
             st.error(f"Erreur lors de la recherche: {e}")
