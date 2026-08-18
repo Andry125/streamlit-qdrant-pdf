@@ -71,34 +71,18 @@ with tab2:
                 limit=5
             )
 
-            # response est un QueryResponse, les résultats sont dans response.points
-            scored_points = response.points
-
             st.write("Résultats :")
-            # Quand tu construis les chunks
-            page_texts = []
-            for page_num, page in enumerate(reader.pages, start=1):
-                text = page.extract_text()
-                if text:
-                    page_texts.append((page_num, text))
-                    for i in range(0, len(text), 500):
-                        chunk = text[i:i+500]
-                        chunks.append(chunk)
-                        page_numbers.append(page_num)
-
-            # Dans la recherche
             for sp in response.points:
                 score = sp.score
                 payload = sp.payload or {}
                 page = payload.get("page", "?")
                 text = payload.get("text", "")
 
-                # Afficher le chunk
                 st.write(f"**Score:** {score:.4f} | **Page:** {page}")
                 st.write(text)
 
                 # Bouton pour afficher la page entière
-                if st.button(f"Voir page {page}", key=f"page_{page}_{score}"):
+                if st.button(f"📄 Voir page {page}", key=f"page_{page}_{score}"):
                     full_page = next((t for p, t in page_texts if p == page), "")
                     st.write(full_page)
                 st.write("---")
