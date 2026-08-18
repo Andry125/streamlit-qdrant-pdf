@@ -14,8 +14,8 @@ model = SentenceTransformer("distiluse-base-multilingual-cased-v1")
 # --- Interface Streamlit ---
 st.title("🔎 API Qdrant via Streamlit")
 
-# Paramètre GET simulé (Typebot enverra ?q=motclé)
-query = st.experimental_get_query_params().get("q", [""])[0]
+# Récupérer le paramètre GET ?q=motcle
+query = st.query_params.get("q", "")
 
 if query:
     query_vector = model.encode(query).tolist()
@@ -34,5 +34,6 @@ if query:
         for sp in response.points
     ]
 
-    # Retour JSON brut
     st.json(results)
+else:
+    st.write("Ajoute ?q=motcle à l’URL pour tester.")
