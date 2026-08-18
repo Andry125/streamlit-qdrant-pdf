@@ -63,15 +63,18 @@ with tab2:
     query = st.text_input("Entre ta requête (mot-clé ou phrase)")
 
     if query:
-        query_vector = model.encode(query)
-        results = client.search(
-            collection_name="pdf_docs",
-            query_vector=query_vector,
-            limit=5
-        )
+        query_vector = model.encode(query).tolist()  # ⚠️ convertir en liste pour éviter les erreurs
+        try:
+            results = client.search(
+                collection_name="pdf_docs",
+                query_vector=query_vector,
+                limit=5
+            )
 
-        st.write("Résultats :")
-        for r in results:
-            st.write(f"**Score:** {r.score:.4f} | **Page:** {r.payload['page']}")
-            st.write(r.payload["text"])
-            st.write("---")
+            st.write("Résultats :")
+            for r in results:
+                st.write(f"**Score:** {r.score:.4f} | **Page:** {r.payload.get('page', '?')}")
+                st.write(r.payload["text"])
+                st.write("---")
+        except Exception as e:
+            st.error(f"Erreur lors de la recherche: {e}")
