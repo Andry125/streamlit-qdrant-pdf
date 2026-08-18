@@ -16,48 +16,47 @@ st.title("📚 PDF + Qdrant Cloud")
 tab1, tab2 = st.tabs(["📤 Upload", "🔍 Search"])
 
 with tab1:
-    uploaded_file = st.file_uploader("Choisis un PDF", type="pdf")
+uploaded_file = st.file_uploader("Choisis un PDF", type="pdf")
 
-    if uploaded_file is not None:
-        reader = PdfReader(uploaded_file)
+if uploaded_file is not None:
+    reader = PdfReader(uploaded_file)
 
-        chunks = []
-        page_numbers = []
+    chunks = []
+    page_numbers = []
+    page_texts = []  # stocker le texte complet de chaque page
 
-        # Découper page par page en morceaux de 500 caractères
-        for page_num, page in enumerate(reader.pages, start=1):
-            text = page.extract_text()
-            if text:
-                for i in range(0, len(text), 500):
-                    chunk = text[i:i+500]
-                    chunks.append(chunk)
-                    page_numbers.append(page_num)
+    for page_num, page in enumerate(reader.pages, start=1):
+        text = page.extract_text()
+        if text:
+            page_texts.append((page_num, text))
+            for i in range(0, len(text), 500):
+                chunk = text[i:i+500]
+                chunks.append(chunk)
+                page_numbers.append(page_num)
 
-        vectors = model.encode(chunks)
+    vectors = model.encode(chunks)
 
-        # Créer la collection si elle n'existe pas
-        try:
-            client.create_collection(
-                collection_name="pdf_docs",
-                vectors_config=models.VectorParams(size=len(vectors[0]), distance=models.Distance.COSINE),
-            )
-        except Exception:
-            st.info("La collection existe déjà, on continue.")
-
-        # Insérer les points avec numéro de page
-        client.upsert(
+    try:
+        client.create_collection(
             collection_name="pdf_docs",
-            points=[
-                models.PointStruct(
-                    id=i,
-                    vector=vectors[i],
-                    payload={"text": chunks[i], "page": page_numbers[i]}
-                )
-                for i in range(len(chunks))
-            ]
+            vectors_config=models.VectorParams(size=len(vectors[0]), distance=models.Distance.COSINE),
         )
+    except Exception:
+        st.info("La collection existe déjà, on continue.")
 
-        st.success("✅ PDF indexé dans Qdrant Cloud avec numéros de page !")
+    client.upsert(
+        collection_name="pdf_docs",
+        points=[
+            models.PointStruct(
+                id=i,
+                vector=vectors[i],
+                payload={"text": chunks[i], "page": page_numbers[i]}
+            )
+            for i in range(len(chunks))
+        ]
+    )
+
+    st.success("✅ PDF indexé avec numéros de page !")
 
 with tab2:
     query = st.text_input("Entre ta requête (mot-clé ou phrase)")
