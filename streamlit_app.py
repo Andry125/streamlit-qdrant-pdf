@@ -1,41 +1,41 @@
-import streamlit as st
-from qdrant_client import QdrantClient
-from sentence_transformers import SentenceTransformer
-from PyPDF2 import PdfReader
-from qdrant_client.http import models
+importateur éclairé par un ruisseau comme st
+de qdrant_client importateur Client Qdrant
+de transformateurs_de phrases importateur Transformateur de phrases
+de pypdf importateur Lecteur PDF
+de qdrant_client.http mode importateur
 
-# Charger secrets
-QDRANT_URL = st.secrets["QDRANT_URL"]
+# Secrets du chargeur
+QDRANT_URL = st.secrets["URL_QDRANT"]
 QDRANT_API_KEY = st.secrets["QDRANT_API_KEY"]
 
-client = QdrantClient(url=QDRANT_URL, api_key=QDRANT_API_KEY)
-model = SentenceTransformer("distiluse-base-multilingual-cased-v1")
+client = Client Qdrant(url=QDRANT_URL, api_key=QDRANT_API_KEY)
+modèle = Transformateur de phrases("distiluse-base-multilingual-cased-v1")
 
-st.title("📚 Uploader PDF vers Qdrant Cloud")
+st.titre("📚 Téléchargeur PDF vers Qdrant Cloud")
 
-uploaded_file = st.file_uploader("Choisis un PDF", type="pdf")
+fichier_téléchargé = st.téléchargeur_fichier("Choisis un PDF", type="pdf")
 
-if uploaded_file is not None:
-    reader = PdfReader(uploaded_file)
-    text = "".join([page.extract_text() for page in reader.pages])
+si fichier_téléchargé est pas Aucun :
+    lecteur = Lecteur PDF(fichier_téléchargé)
+    texte = ".rejoindre([page.extraire_texte() pour page dans lecteur.pages])
 
-    st.write("Texte extrait (aperçu) :")
-    st.write(text[:500])
+    st.écrire("Texte extrait (aperçu) :")
+    st.écrire(texte[:500])
 
-    chunks = [text[i:i+500] for i in range(0, len(text), 500)]
-    vectors = model.encode(chunks)
+    morceaux = [texte[i:i+500] verser je danse gamme(0, len(texte), 500)]
+    vecteurs = modèle.encodeur(morceaux)
 
-    client.recreate_collection(
-        collection_name="pdf_docs",
-        vectors_config=models.VectorParams(size=len(vectors[0]), distance=models.Distance.COSINE),
+    client.collection_recréer(
+        nom_collection="pdf_docs",
+        vecteurs_config=modèles.Paramètres vectoriels(taille=len(vecteurs[0]), distance=modèles.Distance.COSINUS),
     )
 
-    client.upsert(
-        collection_name="pdf_docs",
+    client.insérer(
+        nom_collection="pdf_docs",
         points=[
-            models.PointStruct(id=i, vector=vectors[i], payload={"text": chunks[i]})
-            for i in range(len(chunks))
+            modèles.Structure point(id=i, vecteur=vecteurs[i], charge utile={"texte": morceaux[i]})
+            pour je dans gamme(len(morceaux))
         ]
     )
 
-    st.success("✅ PDF indexé dans Qdrant Cloud !")
+    st.succès("✅ PDF indexé dans Qdrant Cloud !")
