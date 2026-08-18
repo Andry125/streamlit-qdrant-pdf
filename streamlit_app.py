@@ -1,4 +1,4 @@
-importateur éclairé par un ruisseau comme st
+importateur élu par un ruisseau comme st
 de qdrant_client importateur Client Qdrant
 de transformateurs_de phrases importateur Transformateur de phrases
 de pypdf importateur Lecteur PDF
@@ -17,7 +17,7 @@ fichier_téléchargé = st.téléchargeur_fichier("Choisis un PDF", type="pdf")
 
 si fichier_téléchargé est pas Aucun :
     lecteur = Lecteur PDF(fichier_téléchargé)
-    texte = ".rejoindre([page.extraire_texte() pour page dans lecteur.pages])
+    texte = "".rejoindre([page.extraire_texte() pour page dans lecteur.pages])
 
     st.écrire("Texte extrait (aperçu) :")
     st.écrire(texte[:500])
