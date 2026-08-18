@@ -65,14 +65,14 @@ with tab2:
     if query:
         query_vector = model.encode(query).tolist()
         try:
-            results = client.query_points(
+            response = client.query_points(
                 collection_name="pdf_docs",
                 query=query_vector,
                 limit=5
             )
 
-            # results est un tuple ("points", [ScoredPoint,...])
-            scored_points = results[1]
+            # response est un QueryResponse, les résultats sont dans response.points
+            scored_points = response.points
 
             st.write("Résultats :")
             for sp in scored_points:
