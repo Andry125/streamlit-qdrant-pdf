@@ -63,11 +63,11 @@ with tab2:
     query = st.text_input("Entre ta requête (mot-clé ou phrase)")
 
     if query:
-        query_vector = model.encode(query).tolist()  # ⚠️ convertir en liste pour éviter les erreurs
+        query_vector = model.encode(query).tolist()  # convertir en liste
         try:
-            results = client.search(
+            results = client.search_points(
                 collection_name="pdf_docs",
-                query_vector=query_vector,
+                query=query_vector,
                 limit=5
             )
 
