@@ -72,24 +72,32 @@ with tab2:
             )
 
             st.write("Résultats :")
+
             for r in results:
+                # Si r est une liste (par ex. [score, payload])
+                if isinstance(r, list) and len(r) >= 2:
+                    score, payload = r[0], r[1]
                 # Si r est un dict
-                if isinstance(r, dict):
-                    score = r.get("score", None)
+                elif isinstance(r, dict):
+                    score = r.get("score")
                     payload = r.get("payload", {})
-                # Si r est un objet avec attributs
+                # Si r est un objet
                 elif hasattr(r, "score") and hasattr(r, "payload"):
                     score = r.score
                     payload = r.payload
-                # Si r est un tuple (score, payload)
-                elif isinstance(r, tuple) and len(r) >= 2:
-                    score, payload = r[0], r[1]
                 else:
                     st.write("Format inattendu:", r)
                     continue
 
-                st.write(f"**Score:** {score} | **Page:** {payload.get('page', '?')}")
-                st.write(payload.get("text", ""))
+                # Affichage
+                if isinstance(payload, dict):
+                    page = payload.get("page", "?")
+                    text = payload.get("text", "")
+                else:
+                    page, text = "?", str(payload)
+
+                st.write(f"**Score:** {score} | **Page:** {page}")
+                st.write(text)
                 st.write("---")
 
         except Exception as e:
